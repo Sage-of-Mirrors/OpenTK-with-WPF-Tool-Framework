@@ -21,7 +21,7 @@ namespace OpenGL_in_WPF_Framework
             set { eye = value; }
         }
 
-        Vector3 eye = new Vector3(0, 0, 1);
+        Vector3 eye = new Vector3(0, 0, 0);
 
         public Vector3 TargetPos
         {

@@ -38,9 +38,10 @@ namespace OpenGL_in_WPF_Framework
             m_glControl.MakeCurrent();
             m_glControl.MouseDown += m_glControl_MouseDown;
             m_glControl.MouseUp += m_glControl_MouseUp;
+            m_glControl.MouseMove += m_glControl_MouseMove;
             m_glControl.Dock = System.Windows.Forms.DockStyle.Fill;
             m_glControl.AllowDrop = true;
-            m_glControl.BackColor = System.Drawing.Color.Black;
+            m_glControl.BackColor = System.Drawing.Color.Fuchsia;
             m_viewModel.OnGraphicsContextInitialized(m_glControl, GLHost);
 
             GLHost.Child = m_glControl;
@@ -50,11 +51,18 @@ namespace OpenGL_in_WPF_Framework
         void m_glControl_MouseDown(object sender, System.Windows.Forms.MouseEventArgs e)
         {
             m_viewModel.SetMouseState(e.Button, true);
+
+            //m_viewModel.CastRay(e.X, e.Y);
         }
 
         void m_glControl_MouseUp(object sender, System.Windows.Forms.MouseEventArgs e)
         {
             m_viewModel.SetMouseState(e.Button, false);
+        }
+
+        void m_glControl_MouseMove(object sender, System.Windows.Forms.MouseEventArgs e)
+        {
+            m_viewModel.CastRay(e.X, e.Y);
         }
 
         private void GLHost_KeyDown(object sender, KeyEventArgs e)
@@ -73,6 +81,11 @@ namespace OpenGL_in_WPF_Framework
             {
                 m_viewModel.ResizeViewport();
             }
+        }
+
+        private void GLHost_MouseEnter(object sender, MouseEventArgs e)
+        {
+            //GLHost.Focus();
         }
     }
 }

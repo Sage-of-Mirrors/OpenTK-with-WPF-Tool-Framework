@@ -35,6 +35,8 @@ namespace OpenGL_in_WPF_Framework
 
         private Matrix4 ProjMatrix;
 
+        private Color4 debugRayColor = Color4.Yellow;
+
         internal void OnGraphicsContextInitialized(GLControl context, WindowsFormsHost host)
         {
             m_control = context;
@@ -59,6 +61,67 @@ namespace OpenGL_in_WPF_Framework
 
                 Draw();
             };
+        }
+
+        internal void CastRay(int mouseX, int mouseY)
+        {
+            Vector3 normDevCoordsRay = new Vector3((2.0f * mouseX) / m_control.Width - 1.0f,
+                1.0f - (2.0f * mouseY) / m_control.Height, -1.0f);
+
+            Vector4 clipRay = new Vector4(normDevCoordsRay, 1.0f);
+
+            Vector4 eyeRay = Vector4.Transform(clipRay, Matrix4.Invert(ProjMatrix));
+
+            eyeRay = new Vector4(eyeRay.X, eyeRay.Y, -1, 0);
+
+            Vector3 unNormalizedRay = new Vector3(Vector4.Transform(eyeRay, Matrix4.Invert(ViewMatrix)).Xyz);
+
+            Vector3 normalizedRay = Vector3.Normalize(unNormalizedRay);
+
+            CheckHitAxisAlignedBoundingBox(m_cam.EyePos, normalizedRay, new Vector3(-25, -25, -25), new Vector3(25, 25, 25));
+        }
+
+        internal void CheckHitAxisAlignedBoundingBox(Vector3 eye, Vector3 ray, Vector3 lowerBound, Vector3 upperBound)
+        {
+            Vector3 dirFrac = new Vector3(1.0f / ray.X, 1.0f / ray.Y, 1.0f / ray.Z);
+
+            float t1 = (lowerBound.X - eye.X) * dirFrac.X;
+            float t2 = (upperBound.X - eye.X) * dirFrac.X;
+            float t3 = (lowerBound.Y - eye.Y) * dirFrac.Y;
+            float t4 = (upperBound.Y - eye.Y) * dirFrac.Y;
+            float t5 = (lowerBound.Z - eye.Z) * dirFrac.Z;
+            float t6 = (upperBound.Z - eye.Z) * dirFrac.Z;
+
+            float tmin = Math.Max(Math.Max(Math.Min(t1, t2), Math.Min(t3, t4)), Math.Min(t5, t6));
+            float tmax = Math.Min(Math.Min(Math.Max(t1, t2), Math.Max(t3, t4)), Math.Max(t5, t6));
+
+            if (tmax < 0)
+                debugRayColor = Color4.Yellow;
+
+            if (tmin > tmax)
+                debugRayColor = Color4.Yellow;
+
+            else
+                debugRayColor = Color4.Thistle;
+        }
+
+        internal void CheckHitBoundingSphere(Vector3 eye, Vector3 ray, float radius)
+        {
+            Vector3 position = new Vector3();
+            
+            float b = Vector3.Dot(ray, (eye - position));
+            
+            float c = Vector3.Dot((eye - position), (eye - position));
+            
+            c = c - radius;
+            
+            float a = (b * b) - c;
+            
+            if (a >= 0)
+                debugRayColor = Color4.Red;
+            
+            else
+                debugRayColor = Color4.Yellow;
         }
 
         internal void SetMouseState(System.Windows.Forms.MouseButtons mouseButton, bool down)
@@ -155,7 +218,7 @@ namespace OpenGL_in_WPF_Framework
 
             //Render stuff goes here
 
-            RenderDebugTri();
+            RenderDebugCube();
 
             m_control.SwapBuffers();
         }
@@ -168,12 +231,85 @@ namespace OpenGL_in_WPF_Framework
 
             GL.UniformMatrix4(_uniformMVP, false, ref finalMatrix);
 
-            GL.Uniform4(_uniformColor, Color4.Yellow);
+            GL.Uniform4(_uniformColor, debugRayColor);
 
             GL.Begin(PrimitiveType.Triangles);
-            GL.Vertex3(10, 20, 0);
-            GL.Vertex3(100, 20, 0);
-            GL.Vertex3(100, 50, 0);
+            GL.Vertex3(0, 200, 0);
+            GL.Vertex3(200, 0, 0);
+            GL.Vertex3(-200, 0, 0);
+
+            GL.End();
+        }
+
+        internal void RenderDebugCube()
+        {
+            Matrix4 modelMatrix = Matrix4.CreateTranslation(new Vector3(0, 0, 0)) * Matrix4.Rotate(Quaternion.Identity) * Matrix4.Scale(1);
+
+            Matrix4 finalMatrix = modelMatrix * ViewMatrix * ProjMatrix;
+
+            GL.UniformMatrix4(_uniformMVP, false, ref finalMatrix);
+
+            GL.Uniform4(_uniformColor, debugRayColor);
+
+            GL.Begin(PrimitiveType.Triangles);
+            GL.Vertex3(-25f, -25f, -25f);
+            GL.Vertex3(-25f, 25f, 25f);
+            GL.Vertex3(-25f, 25f, -25f);
+
+            GL.Vertex3(-25f, -25f, -25f);
+            GL.Vertex3(-25f, -25f, 25f);
+            GL.Vertex3(-25f, 25f, 25f);
+
+            GL.Vertex3(25f, -25f, -25f);
+            GL.Vertex3(25f, 25f, -25f);
+            GL.Vertex3(25f, 25f, 25f);
+
+            GL.Vertex3(25f, 25f, 25f);
+            GL.Vertex3(25f, -25f, 25f);
+            GL.Vertex3(25f, -25f, -25f);
+
+            GL.Vertex3(-25f, -25f, -25f);
+            GL.Vertex3(25f, 25f, -25f);
+            GL.Vertex3(25f, -25f, -25f);
+
+            GL.Vertex3(-25f, -25f, -25f);
+            GL.Vertex3(-25f, 25f, -25f);
+            GL.Vertex3(25f, 25f, -25f);
+
+            GL.Vertex3(-25f, -25f, 25f);
+            GL.Vertex3(25f, -25f, 25f);
+            GL.Vertex3(25f, 25f, 25f);
+
+            GL.Vertex3(25f, 25f, 25f);
+            GL.Vertex3(-25f, 25f, 25f);
+            GL.Vertex3(-25f, -25f, 25f);
+
+            GL.Vertex3(25f, 25f, -25f);
+            GL.Vertex3(-25f, 25f, -25f);
+            GL.Vertex3(25f, 25f, 25f);
+
+            GL.Vertex3(25f, 25f, 25f);
+            GL.Vertex3(-25f, 25f, -25f);
+            GL.Vertex3(-25f, 25f, 25f);
+
+            GL.Vertex3(-25f, -25f, -25f);
+            GL.Vertex3(25f, -25f, -25f);
+            GL.Vertex3(25f, -25f, 25f);
+
+            GL.Vertex3(-25f, -25f, -25f);
+            GL.Vertex3(25f, -25f, 25f);
+            GL.Vertex3(-25f, -25f, 25f);
+
+            /*
+            GL.Vertex3(-25f, -25f, -25f);
+            GL.Vertex3(25f, -25f, -25f);
+            GL.Vertex3(25f, 25f, -25f);
+            GL.Vertex3(-25f, 25f, -25f);
+            GL.Vertex3(-25f, -25f, 25f);
+            GL.Vertex3(25f, -25f, 25f);
+            GL.Vertex3(25f, 25f, 25f);
+            GL.Vertex3(-25f, 25f, 25f);
+            */
 
             GL.End();
         }
