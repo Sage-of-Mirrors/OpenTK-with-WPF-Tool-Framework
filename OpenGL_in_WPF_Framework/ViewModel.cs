@@ -14,6 +14,9 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Forms.Integration;
 using System.IO;
+using Microsoft.Win32;
+using GameFormatReader.Common;
+using GameFormatReader.GCWii.Binaries.GC;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
@@ -22,296 +25,250 @@ namespace OpenGL_in_WPF_Framework
 {
     class ViewModel
     {
-        private System.Windows.Forms.Timer m_intervalTimer;
-        private GLControl m_control;
+        private RARC m_loadedRarc;
 
-        private Camera m_cam;
+        private Renderer m_renderer;
 
-        private int _programID;
-        private int _uniformMVP;
-        private int _uniformColor;
-
-        private Matrix4 ViewMatrix;
-
-        private Matrix4 ProjMatrix;
-
-        private Color4 debugRayColor = Color4.Yellow;
-
-        internal void OnGraphicsContextInitialized(GLControl context, WindowsFormsHost host)
+        internal void CreateGraphicsContext(GLControl ctrl, WindowsFormsHost host)
         {
-            m_control = context;
+            m_renderer = new Renderer(ctrl, host);
+        }
 
-            m_cam = new Camera();
+        internal void Open()
+        {
+            OpenFileDialog openFile = new OpenFileDialog();
 
-            SetUpViewport();
-
-            m_intervalTimer = new System.Windows.Forms.Timer();
-            m_intervalTimer.Interval = 16; // 60 FPS roughly
-            m_intervalTimer.Enabled = true;
-            m_intervalTimer.Tick += (args, o) =>
+            if (openFile.ShowDialog() == true)
             {
-                Vector2 mousePosGlobal = new Vector2(System.Windows.Forms.Control.MousePosition.X, System.Windows.Forms.Control.MousePosition.Y);
-                Vector2 glControlPosGlobal = new Vector2((float)host.PointToScreen(new Point(0, 0)).X, (float)host.PointToScreen(new Point(0, 0)).Y);
+                string fileName = openFile.FileName;
 
-                Input.Internal_SetMousePos(new Vector2(System.Windows.Forms.Control.MousePosition.X, System.Windows.Forms.Control.MousePosition.Y));
+                string tempFileName = ""; 
 
-                Input.Internal_UpdateInputState();
+                using (FileStream stream = new FileStream(fileName, FileMode.Open))
+                {
+                    EndianBinaryReader reader = new EndianBinaryReader(stream, Endian.Big);
 
-                m_cam.Update();
+                    string compressedFileTest = reader.ReadString(4);
 
-                Draw();
-            };
+                    if (compressedFileTest == "Yay0")
+                    {
+                        byte[] uncompressedArc = DecodeYay0(reader);
+
+                        reader.Close();
+                        
+                        tempFileName = System.IO.Path.GetTempFileName();
+
+                        fileName = tempFileName;
+
+                        FileInfo info = new FileInfo(fileName);
+
+                        info.Attributes = FileAttributes.Temporary;
+
+                        using (FileStream tempStream = new FileStream(tempFileName, FileMode.Create))
+                        {
+                            EndianBinaryWriter tempWriter = new EndianBinaryWriter(tempStream, Endian.Big);
+
+                            tempWriter.Write(uncompressedArc);
+
+                            tempWriter.Flush();
+
+                            tempWriter.Close();
+                        }
+                    }
+
+                    else if (compressedFileTest == "Yaz0")
+                    {
+                        byte[] uncompressedArc = DecodeYaz0(reader);
+
+                        reader.Close();
+
+                        tempFileName = System.IO.Path.GetTempFileName();
+
+                        fileName = tempFileName;
+
+                        FileInfo info = new FileInfo(fileName);
+
+                        info.Attributes = FileAttributes.Temporary;
+
+                        using (FileStream tempStream = new FileStream(tempFileName, FileMode.Create))
+                        {
+                            EndianBinaryWriter tempWriter = new EndianBinaryWriter(tempStream, Endian.Big);
+
+                            tempWriter.Write(uncompressedArc);
+
+                            tempWriter.Flush();
+
+                            tempWriter.Close();
+                        }
+                    }
+                }
+
+                m_loadedRarc = new RARC(fileName);
+
+                if (File.Exists(tempFileName))
+                    File.Delete(tempFileName);
+            }
         }
 
-        internal void CastRay(int mouseX, int mouseY)
+        #region Nintendo-Specific
+
+        internal byte[] DecodeYay0(EndianBinaryReader reader)
         {
-            Vector3 normDevCoordsRay = new Vector3((2.0f * mouseX) / m_control.Width - 1.0f,
-                1.0f - (2.0f * mouseY) / m_control.Height, -1.0f);
+            int uncompressedSize = reader.ReadInt32();
 
-            Vector4 clipRay = new Vector4(normDevCoordsRay, 1.0f);
+            int linkTableOffset = reader.ReadInt32();
 
-            Vector4 eyeRay = Vector4.Transform(clipRay, Matrix4.Invert(ProjMatrix));
+            int nonLinkedTableOffset = reader.ReadInt32();
 
-            eyeRay = new Vector4(eyeRay.X, eyeRay.Y, -1, 0);
+            int maskBitCounter = 0;
 
-            Vector3 unNormalizedRay = new Vector3(Vector4.Transform(eyeRay, Matrix4.Invert(ViewMatrix)).Xyz);
+            int currentOffsetInDestBuffer = 0;
 
-            Vector3 normalizedRay = Vector3.Normalize(unNormalizedRay);
+            int currentMask = 0;
 
-            CheckHitAxisAlignedBoundingBox(m_cam.EyePos, normalizedRay, new Vector3(-25, -25, -25), new Vector3(25, 25, 25));
-        }
+            byte[] uncompData = new byte[uncompressedSize];
 
-        internal void CheckHitAxisAlignedBoundingBox(Vector3 eye, Vector3 ray, Vector3 lowerBound, Vector3 upperBound)
-        {
-            Vector3 dirFrac = new Vector3(1.0f / ray.X, 1.0f / ray.Y, 1.0f / ray.Z);
-
-            float t1 = (lowerBound.X - eye.X) * dirFrac.X;
-            float t2 = (upperBound.X - eye.X) * dirFrac.X;
-            float t3 = (lowerBound.Y - eye.Y) * dirFrac.Y;
-            float t4 = (upperBound.Y - eye.Y) * dirFrac.Y;
-            float t5 = (lowerBound.Z - eye.Z) * dirFrac.Z;
-            float t6 = (upperBound.Z - eye.Z) * dirFrac.Z;
-
-            float tmin = Math.Max(Math.Max(Math.Min(t1, t2), Math.Min(t3, t4)), Math.Min(t5, t6));
-            float tmax = Math.Min(Math.Min(Math.Max(t1, t2), Math.Max(t3, t4)), Math.Max(t5, t6));
-
-            if (tmax < 0)
-                debugRayColor = Color4.Yellow;
-
-            if (tmin > tmax)
-                debugRayColor = Color4.Yellow;
-
-            else
-                debugRayColor = Color4.Thistle;
-        }
-
-        internal void CheckHitBoundingSphere(Vector3 eye, Vector3 ray, float radius)
-        {
-            Vector3 position = new Vector3();
-            
-            float b = Vector3.Dot(ray, (eye - position));
-            
-            float c = Vector3.Dot((eye - position), (eye - position));
-            
-            c = c - radius;
-            
-            float a = (b * b) - c;
-            
-            if (a >= 0)
-                debugRayColor = Color4.Red;
-            
-            else
-                debugRayColor = Color4.Yellow;
-        }
-
-        internal void SetMouseState(System.Windows.Forms.MouseButtons mouseButton, bool down)
-        {
-            Input.Internal_SetMouseBtnState(mouseButton, down);
-        }
-
-        internal void SetKeyboardState(System.Windows.Forms.Keys key, bool down)
-        {
-            Input.Internal_SetKeyState(key, down);
-        }
-
-        public enum ShaderAttributeIds
-        {
-            Position, Color,
-            TexCoord, Normal
-        }
-
-        internal void SetUpViewport()
-        {
-            _programID = GL.CreateProgram();
-
-            m_cam = new Camera();
-
-            int vertShaderId, fragShaderId;
-            LoadShader("vs.glsl", ShaderType.VertexShader, _programID, out vertShaderId);
-            LoadShader("fs.glsl", ShaderType.FragmentShader, _programID, out fragShaderId);
-
-            GL.DeleteShader(vertShaderId);
-            GL.DeleteShader(fragShaderId);
-
-            GL.BindAttribLocation(_programID, (int)ShaderAttributeIds.Position, "vertexPos");
-
-            GL.LinkProgram(_programID);
-
-            _uniformMVP = GL.GetUniformLocation(_programID, "modelview");
-            _uniformColor = GL.GetUniformLocation(_programID, "col");
-
-            if (GL.GetError() != ErrorCode.NoError)
-                Console.WriteLine(GL.GetProgramInfoLog(_programID));
-        }
-
-        protected void LoadShader(string fileName, ShaderType type, int program, out int address)
-        {
-            address = GL.CreateShader(type);
-            using (var streamReader = new StreamReader(fileName))
+            do
             {
-                GL.ShaderSource(address, streamReader.ReadToEnd());
+                if (maskBitCounter == 0)
+                {
+                    currentMask = reader.ReadInt32();
+
+                    maskBitCounter = 32;
+                }
+
+                if (((uint)currentMask & (uint)0x80000000) == 0x80000000)
+                {
+                    uncompData[currentOffsetInDestBuffer] = reader.ReadByteAt(nonLinkedTableOffset);
+
+                    currentOffsetInDestBuffer++;
+
+                    nonLinkedTableOffset++;
+                }
+
+                else
+                {
+                    ushort link = reader.ReadUInt16At(linkTableOffset);
+
+                    linkTableOffset += 2;
+
+                    int offset = currentOffsetInDestBuffer - (link & 0xfff);
+
+                    int count = link >> 12;
+
+                    if (count == 0)
+                    {
+                        byte countModifier;
+
+                        countModifier = reader.ReadByteAt(nonLinkedTableOffset);
+
+                        nonLinkedTableOffset++;
+
+                        count = countModifier + 18;
+                    }
+
+                    else
+                        count += 2;
+
+                    int blockCopy = offset;
+
+                    for (int i = 0; i < count; i++)
+                    {
+                        uncompData[currentOffsetInDestBuffer] = uncompData[blockCopy - 1];
+
+                        currentOffsetInDestBuffer++;
+
+                        blockCopy++;
+                    }
+                }
+
+                currentMask <<= 1;
+
+                maskBitCounter--;
+
+            } while (currentOffsetInDestBuffer < uncompressedSize);
+
+            return uncompData;
+        }
+
+        internal byte[] DecodeYaz0(EndianBinaryReader reader)
+        {
+            int uncompressedSize = reader.ReadInt32();
+
+            byte[] dest = new byte[uncompressedSize];
+
+            int srcPlace = 0x10, dstPlace = 0; //current read/write positions
+
+            int validBitCount = 0; //number of valid bits left in "code" byte
+
+            byte currCodeByte = 0;
+
+            while (dstPlace < uncompressedSize)
+            {
+                //read new "code" byte if the current one is used up
+                if (validBitCount == 0)
+                {
+                    currCodeByte = reader.ReadByteAt(srcPlace);
+
+                    ++srcPlace;
+
+                    validBitCount = 8;
+                }
+
+                if ((currCodeByte & 0x80) != 0)
+                {
+                    //straight copy
+                    dest[dstPlace] = reader.ReadByteAt(srcPlace);
+
+                    dstPlace++;
+
+                    srcPlace++;
+                }
+
+                else
+                {
+                    //RLE part
+                    byte byte1 = reader.ReadByteAt(srcPlace);
+
+                    byte byte2 = reader.ReadByteAt(srcPlace + 1);
+
+                    srcPlace += 2;
+
+                    int dist = ((byte1 & 0xF) << 8) | byte2;
+
+                    int copySource = dstPlace - (dist + 1);
+
+                    int numBytes = byte1 >> 4;
+
+                    if (numBytes == 0)
+                    {
+                        numBytes = reader.ReadByteAt(srcPlace) + 0x12;
+                        srcPlace++;
+                    }
+
+                    else
+                        numBytes += 2;
+
+                    //copy run
+                    for (int i = 0; i < numBytes; ++i)
+                    {
+                        dest[dstPlace] = dest[copySource];
+
+                        copySource++;
+
+                        dstPlace++;
+                    }
+                }
+
+                //use next bit from "code" byte
+                currCodeByte <<= 1;
+
+                validBitCount -= 1;
             }
 
-            GL.CompileShader(address);
-
-            GL.AttachShader(program, address);
-
-            int compileSuccess;
-            GL.GetShader(address, ShaderParameter.CompileStatus, out compileSuccess);
-
-            if (compileSuccess == 0)
-                Console.WriteLine(GL.GetShaderInfoLog(address));
+            return dest;
         }
 
-        internal void ResizeViewport()
-        {
-            GL.Viewport(0, 0, m_control.Width, m_control.Height);
-        }
-
-        internal void Draw()
-        {
-            GL.ClearColor(new Color4(.36f, .25f, .94f, 1f));
-            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-
-            GL.UseProgram(_programID);
-
-            GL.Enable(EnableCap.DepthTest);
-
-            GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
-
-            float width, height;
-
-            if (m_control.Width == 0)
-                width = 1f;
-
-            else
-                width = m_control.Width;
-
-            if (m_control.Height == 0)
-                height = 1f;
-
-            else
-                height = m_control.Height;
-
-            ViewMatrix = m_cam.ViewMatrix;
-            ProjMatrix = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(65), width / height, 100, 500000);
-
-            //Render stuff goes here
-
-            RenderDebugCube();
-
-            m_control.SwapBuffers();
-        }
-
-        internal void RenderDebugTri()
-        {
-            Matrix4 modelMatrix = Matrix4.CreateTranslation(new Vector3(0, 0, 0)) * Matrix4.Rotate(Quaternion.Identity) * Matrix4.Scale(1);
-
-            Matrix4 finalMatrix = modelMatrix * ViewMatrix * ProjMatrix;
-
-            GL.UniformMatrix4(_uniformMVP, false, ref finalMatrix);
-
-            GL.Uniform4(_uniformColor, debugRayColor);
-
-            GL.Begin(PrimitiveType.Triangles);
-            GL.Vertex3(0, 200, 0);
-            GL.Vertex3(200, 0, 0);
-            GL.Vertex3(-200, 0, 0);
-
-            GL.End();
-        }
-
-        internal void RenderDebugCube()
-        {
-            Matrix4 modelMatrix = Matrix4.CreateTranslation(new Vector3(0, 0, 0)) * Matrix4.Rotate(Quaternion.Identity) * Matrix4.Scale(1);
-
-            Matrix4 finalMatrix = modelMatrix * ViewMatrix * ProjMatrix;
-
-            GL.UniformMatrix4(_uniformMVP, false, ref finalMatrix);
-
-            GL.Uniform4(_uniformColor, debugRayColor);
-
-            GL.Begin(PrimitiveType.Triangles);
-            GL.Vertex3(-25f, -25f, -25f);
-            GL.Vertex3(-25f, 25f, 25f);
-            GL.Vertex3(-25f, 25f, -25f);
-
-            GL.Vertex3(-25f, -25f, -25f);
-            GL.Vertex3(-25f, -25f, 25f);
-            GL.Vertex3(-25f, 25f, 25f);
-
-            GL.Vertex3(25f, -25f, -25f);
-            GL.Vertex3(25f, 25f, -25f);
-            GL.Vertex3(25f, 25f, 25f);
-
-            GL.Vertex3(25f, 25f, 25f);
-            GL.Vertex3(25f, -25f, 25f);
-            GL.Vertex3(25f, -25f, -25f);
-
-            GL.Vertex3(-25f, -25f, -25f);
-            GL.Vertex3(25f, 25f, -25f);
-            GL.Vertex3(25f, -25f, -25f);
-
-            GL.Vertex3(-25f, -25f, -25f);
-            GL.Vertex3(-25f, 25f, -25f);
-            GL.Vertex3(25f, 25f, -25f);
-
-            GL.Vertex3(-25f, -25f, 25f);
-            GL.Vertex3(25f, -25f, 25f);
-            GL.Vertex3(25f, 25f, 25f);
-
-            GL.Vertex3(25f, 25f, 25f);
-            GL.Vertex3(-25f, 25f, 25f);
-            GL.Vertex3(-25f, -25f, 25f);
-
-            GL.Vertex3(25f, 25f, -25f);
-            GL.Vertex3(-25f, 25f, -25f);
-            GL.Vertex3(25f, 25f, 25f);
-
-            GL.Vertex3(25f, 25f, 25f);
-            GL.Vertex3(-25f, 25f, -25f);
-            GL.Vertex3(-25f, 25f, 25f);
-
-            GL.Vertex3(-25f, -25f, -25f);
-            GL.Vertex3(25f, -25f, -25f);
-            GL.Vertex3(25f, -25f, 25f);
-
-            GL.Vertex3(-25f, -25f, -25f);
-            GL.Vertex3(25f, -25f, 25f);
-            GL.Vertex3(-25f, -25f, 25f);
-
-            /*
-            GL.Vertex3(-25f, -25f, -25f);
-            GL.Vertex3(25f, -25f, -25f);
-            GL.Vertex3(25f, 25f, -25f);
-            GL.Vertex3(-25f, 25f, -25f);
-            GL.Vertex3(-25f, -25f, 25f);
-            GL.Vertex3(25f, -25f, 25f);
-            GL.Vertex3(25f, 25f, 25f);
-            GL.Vertex3(-25f, 25f, 25f);
-            */
-
-            GL.End();
-        }
+        #endregion
     }
 }

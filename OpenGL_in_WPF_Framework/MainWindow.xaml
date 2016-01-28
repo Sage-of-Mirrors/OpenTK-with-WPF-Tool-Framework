@@ -10,7 +10,7 @@
         <DockPanel VerticalAlignment="Top" Height="20">
             <Menu DockPanel.Dock="Top">
                 <MenuItem Header="_File...">
-                    <MenuItem Header="_Open" Command="{Binding OnRequestMapOpen}"/>
+                    <MenuItem Header="_Open" Command="{Binding OnRequestMapOpen}" Click="MenuItem_Click"/>
                     <MenuItem Header="_Close" Command="{Binding OnRequestMapClose}"/>
                     <MenuItem Header="_Save" Command="{Binding OnRequestMapSave}"/>
                     <Separator/>
@@ -22,7 +22,7 @@
             <TreeView Width="209" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
         </DockPanel>
         <DockPanel LastChildFill="True" Margin="210,20,0,0" Grid.RowSpan="2" Background="{DynamicResource {x:Static SystemColors.ActiveCaptionBrushKey}}">
-            <WindowsFormsHost x:Name="GLHost" Background="{x:Null}" DockPanel.Dock="Bottom" Initialized="GLHost_Initialized" KeyDown="GLHost_KeyDown" KeyUp="GLHost_KeyUp" Foreground="{x:Null}" LayoutUpdated="GLHost_LayoutUpdated" MouseEnter="GLHost_MouseEnter"/>
+            <WindowsFormsHost x:Name="GLHost" Background="{x:Null}" DockPanel.Dock="Bottom" Initialized="GLHost_Initialized" Foreground="{x:Null}"/>
         </DockPanel>
     </Grid>
 </Window>

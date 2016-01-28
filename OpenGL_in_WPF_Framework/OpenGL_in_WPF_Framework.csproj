@@ -70,7 +70,9 @@
     </ApplicationDefinition>
     <Compile Include="Camera.cs" />
     <Compile Include="Input.cs" />
+    <Compile Include="IRenderable.cs" />
     <Compile Include="MathE.cs" />
+    <Compile Include="Renderer.cs" />
     <Compile Include="ViewModel.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
