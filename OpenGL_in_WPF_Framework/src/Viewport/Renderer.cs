@@ -27,6 +27,7 @@ namespace OpenGL_in_WPF_Framework
         private Timer m_intervalTimer;
 
         private GLControl m_control;
+        private bool isCreated;
 
         private int _programID;
         private int _uniformMVP;
@@ -71,16 +72,14 @@ namespace OpenGL_in_WPF_Framework
             };
 
             m_control.MouseUp += m_control_MouseUp;
-
             m_control.MouseDown += m_control_MouseDown;
-
             m_control.MouseMove += m_control_MouseMove;
-
             host.KeyUp += host_KeyUp;
-
             host.KeyDown += host_KeyDown;
 
             host.LayoutUpdated += host_LayoutUpdated;
+            ProjectionMatrix = Matrix4.Identity;
+            isCreated = true;
         }
 
         private void SetUpViewport()
@@ -132,6 +131,9 @@ namespace OpenGL_in_WPF_Framework
 
         private void Draw()
         {
+            if (!isCreated)
+                return;
+
             GL.ClearColor(new Color4(.36f, .25f, .94f, 1f));
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
@@ -262,32 +264,50 @@ namespace OpenGL_in_WPF_Framework
 
         void m_control_MouseUp(object sender, System.Windows.Forms.MouseEventArgs e)
         {
+            if (!isCreated)
+                return;
+
             Input.Internal_SetMouseBtnState(e.Button, false);
         }
 
         void m_control_MouseDown(object sender, System.Windows.Forms.MouseEventArgs e)
         {
+            if (!isCreated)
+                return;
+
             Input.Internal_SetMouseBtnState(e.Button, true);
         }
 
         void m_control_MouseMove(object sender, System.Windows.Forms.MouseEventArgs e)
         {
+            if (!isCreated)
+                return;
+
             debugRayColor = Cam.CastRay(e.X, e.Y, m_control.Width, m_control.Height, ProjectionMatrix);
         }
 
         void host_KeyUp(object sender, System.Windows.Input.KeyEventArgs e)
         {
+            if (!isCreated)
+                return;
+
             Input.Internal_SetKeyState((Keys)KeyInterop.VirtualKeyFromKey(e.Key), false);
         }
 
         void host_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {
+            if (!isCreated)
+                return;
+
             Input.Internal_SetKeyState((Keys)KeyInterop.VirtualKeyFromKey(e.Key), true);
         }
 
         void host_LayoutUpdated(object sender, EventArgs e)
         {
-            GL.Viewport(0, 0, m_control.Width, m_control.Height);
+            if (!isCreated)
+                return;
+
+            GL.Viewport(m_control.Location.X, m_control.Location.Y, m_control.Width, m_control.Height);
         }
 
         #endregion
