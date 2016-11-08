@@ -7,12 +7,12 @@ using System.Windows;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("LMActorViewer")]
+[assembly: AssemblyTitle("OpenTK with WPF Framework")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Windows User")]
-[assembly: AssemblyProduct("LMActorViewer")]
-[assembly: AssemblyCopyright("Copyright © Windows User 2016")]
+[assembly: AssemblyCompany("Sage of Mirrors")]
+[assembly: AssemblyProduct("OpenTK with WPF Framework")]
+[assembly: AssemblyCopyright("Copyright © Sage of Mirrors 2016")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

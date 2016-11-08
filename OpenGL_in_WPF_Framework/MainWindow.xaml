@@ -3,10 +3,6 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="MainWindow" Height="600" Width="1000">
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="17*"/>
-            <RowDefinition Height="15*"/>
-        </Grid.RowDefinitions>
         <DockPanel VerticalAlignment="Top" Height="20">
             <Menu DockPanel.Dock="Top">
                 <MenuItem Header="_File...">
@@ -18,11 +14,11 @@
                 </MenuItem>
             </Menu>
         </DockPanel>
-        <DockPanel LastChildFill="False" Margin="0,20,0,0" Width="210" HorizontalAlignment="Left" Grid.RowSpan="2">
+        <DockPanel LastChildFill="False" Margin="0,20,0,0" Width="210" HorizontalAlignment="Left" Focusable="True">
             <TreeView Width="209" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
         </DockPanel>
-        <DockPanel LastChildFill="True" Margin="210,20,0,0" Grid.RowSpan="2" Background="{DynamicResource {x:Static SystemColors.ActiveCaptionBrushKey}}">
-            <WindowsFormsHost x:Name="GLHost" Background="{x:Null}" DockPanel.Dock="Bottom" Initialized="GLHost_Initialized" Foreground="{x:Null}"/>
+        <DockPanel LastChildFill="True" Margin="210,20,0,0">
+            <WindowsFormsHost x:Name="GLHost" Background="{x:Null}" DockPanel.Dock="Bottom" Initialized="GLHost_Initialized" Foreground="{x:Null}" Focusable="True"/>
         </DockPanel>
     </Grid>
 </Window>
