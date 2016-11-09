@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using OpenTK;
 
-namespace OpenTKFramework
+namespace OpenTKFramework.src.Camera
 {
     public static class MathE
     {

@@ -73,15 +73,16 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="src\RelayCommand.cs" />
-    <Compile Include="src\Viewmodel\Command Callbacks.cs" />
-    <Compile Include="src\Viewmodel\INotifyPropertyChanged Implementation.cs" />
-    <Compile Include="src\Viewport\Camera.cs" />
-    <Compile Include="src\Viewport\Input.cs" />
+    <Compile Include="src\Camera\Transform.cs" />
+    <Compile Include="src\ViewModel\RelayCommand.cs" />
+    <Compile Include="src\ViewModel\Command Callbacks.cs" />
+    <Compile Include="src\ViewModel\INotifyPropertyChanged Implementation.cs" />
+    <Compile Include="src\Camera\Camera.cs" />
+    <Compile Include="src\Camera\Input.cs" />
     <Compile Include="src\Viewport\IRenderable.cs" />
-    <Compile Include="src\MathE.cs" />
+    <Compile Include="src\Camera\MathE.cs" />
     <Compile Include="src\Viewport\Renderer.cs" />
-    <Compile Include="src\Viewmodel\File Input.cs" />
+    <Compile Include="src\ViewModel\File Input.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

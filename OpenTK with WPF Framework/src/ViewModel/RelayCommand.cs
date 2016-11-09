@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
-namespace OpenTKFramework.src
+namespace OpenTKFramework.src.Viewmodel
 {
     class RelayCommand : ICommand
     {

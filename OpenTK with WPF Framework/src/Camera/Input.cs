@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using OpenTK;
 
-namespace OpenTKFramework
+namespace OpenTKFramework.src.Camera
 {
     public static class Input
     {

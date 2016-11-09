@@ -66,7 +66,7 @@ namespace OpenTKFramework.src.Viewmodel
         /// </summary>
         private void ReportBug()
         {
-            System.Diagnostics.Process.Start("https://github.com/Sage-of-Mirrors/OpenTK-with-WPF-Tool-Framework/issues");
+            System.Diagnostics.Process.Start("https://github.com/Sage-of-Mirrors/OpenTK_with_WPF_Framework/issues");
         }
 
         /// <summary>
@@ -74,7 +74,7 @@ namespace OpenTKFramework.src.Viewmodel
         /// </summary>
         private void OpenWiki()
         {
-            System.Diagnostics.Process.Start("https://github.com/Sage-of-Mirrors/OpenTK-with-WPF-Tool-Framework/wiki");
+            System.Diagnostics.Process.Start("https://github.com/Sage-of-Mirrors/OpenTK_with_WPF_Framework/wiki");
         }
     }
 }

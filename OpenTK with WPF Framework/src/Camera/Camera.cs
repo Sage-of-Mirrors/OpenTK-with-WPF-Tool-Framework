@@ -3,7 +3,7 @@ using System.Windows.Forms;
 using OpenTK;
 using OpenTK.Graphics;
 
-namespace OpenTKFramework
+namespace OpenTKFramework.src.Camera
 {
     public class Camera
     {
@@ -30,59 +30,59 @@ namespace OpenTKFramework
 
         Transform Trans = new Transform();
 
+        /// <summary>
+        /// Processes user input for moving the camera each frame.
+        /// </summary>
         public void Update()
         {
             float MoveSpeed = 50f;
-
             Vector3 moveDir = Vector3.Zero;
-
+            
+            // Move forward
             if (Input.GetKey(Keys.W))
             {
                 moveDir += Vector3.UnitZ;
             }
-
+            // Move backward
             if (Input.GetKey(Keys.S))
             {
                 moveDir -= Vector3.UnitZ;
             }
-
+            // Move left
             if (Input.GetKey(Keys.A))
             {
                 moveDir += Vector3.UnitX;
             }
-
+            // Move right
             if (Input.GetKey(Keys.D))
             {
                 moveDir -= Vector3.UnitX;
             }
-
+            // Move up
             if (Input.GetKey(Keys.E))
             {
                 moveDir += Vector3.UnitY;
             }
-
+            // Move down
             if (Input.GetKey(Keys.Q))
             {
                 moveDir -= Vector3.UnitY;
             }
-
+            // Rotate camera based on mouse movement
             if (Input.GetMouseButton(1))
             {
                 Rotate(Input.MouseDelta.X, Input.MouseDelta.Y);
             }
 
-            float moveSpeed = Input.GetKey(Keys.Space) ? MoveSpeed * 10f : MoveSpeed;
+            float moveSpeed = Input.GetKey(Keys.LShiftKey) ? MoveSpeed * 10f : MoveSpeed;
 
             // Normalize the move direction
             moveDir.NormalizeFast();
-
             // Make it relative to the current rotation.
             moveDir = Trans.Rotation.Multiply(moveDir);
 
             Trans.Position += Vector3.Multiply(moveDir, moveSpeed);
-
             eye = Trans.Position;
-
             target = Trans.Position + Trans.Forward;
         }
 
@@ -163,50 +163,5 @@ namespace OpenTKFramework
         }
 
         #endregion
-    }
-
-    public class Transform
-    {
-        public Transform()
-        {
-            Position = Vector3.Zero;
-            Rotation = Quaternion.Identity;
-            Scale = Vector3.One;
-        }
-
-        public Vector3 Position;
-        public Quaternion Rotation;
-        public Vector3 Scale;
-
-        public Vector3 Right
-        {
-            get { return Rotation.Multiply(Vector3.UnitX); }
-        }
-
-        public Vector3 Forward
-        {
-            get { return Rotation.Multiply(Vector3.UnitZ); }
-        }
-
-        public Vector3 Up
-        {
-            get { return Rotation.Multiply(Vector3.UnitY); }
-        }
-
-        public void LookAt(Vector3 worldPosition)
-        {
-            Rotation = Quaternion.FromAxisAngle(Vector3.Normalize((Position - worldPosition)), 0f);
-        }
-
-        public void Rotate(Vector3 axis, float angleInDegrees)
-        {
-            Quaternion rotQuat = Quaternion.FromAxisAngle(axis, MathHelper.DegreesToRadians(angleInDegrees));
-            Rotation = rotQuat * Rotation;
-        }
-
-        public void Translate(Vector3 amount)
-        {
-            Position += amount;
-        }
     }
 }

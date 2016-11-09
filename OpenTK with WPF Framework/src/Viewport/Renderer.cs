@@ -8,6 +8,7 @@ using System.Windows.Input;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
+using OpenTKFramework.src.Camera;
 
 namespace OpenTKFramework
 {
