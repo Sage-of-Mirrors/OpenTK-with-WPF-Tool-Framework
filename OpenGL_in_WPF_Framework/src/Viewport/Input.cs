@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using OpenTK;
 
-namespace OpenGL_in_WPF_Framework
+namespace OpenTKFramework
 {
     public static class Input
     {

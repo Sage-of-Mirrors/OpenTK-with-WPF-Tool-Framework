@@ -2,8 +2,9 @@
 using System.Windows;
 using OpenTK;
 using OpenTK.Graphics;
+using OpenTKFramework.src.Viewmodel;
 
-namespace OpenGL_in_WPF_Framework
+namespace OpenTKFramework
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -15,7 +16,7 @@ namespace OpenGL_in_WPF_Framework
         public MainWindow()
         {
             m_viewModel = new ViewModel();
-
+            DataContext = m_viewModel;
             InitializeComponent();
         }
 

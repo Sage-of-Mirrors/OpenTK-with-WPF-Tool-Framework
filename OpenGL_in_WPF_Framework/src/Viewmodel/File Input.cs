@@ -1,29 +1,31 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Forms.Integration;
+﻿using System.Windows.Forms.Integration;
 using System.IO;
 using Microsoft.Win32;
-using GameFormatReader.Common;
 using WArchiveTools.FileSystem;
 using OpenTK;
-using OpenTK.Graphics;
-using OpenTK.Graphics.OpenGL;
+using System.ComponentModel;
 
-namespace OpenGL_in_WPF_Framework
+namespace OpenTKFramework.src.Viewmodel
 {
-    class ViewModel
+    partial class ViewModel : INotifyPropertyChanged
     {
+        #region string WindowTitle
+        private string m_windowTitle;
+
+        public string WindowTitle
+        {
+            get { return string.Format("{0} - OpenTK with WPF Framework", m_windowTitle); }
+            set
+            {
+                if (m_windowTitle != value)
+                {
+                    m_windowTitle = value;
+                    NotifyPropertyChanged();
+                }
+            }
+        }
+        #endregion
+
         private VirtualFilesystemDirectory m_loadedRarc;
         private Renderer m_renderer;
 
@@ -39,6 +41,7 @@ namespace OpenGL_in_WPF_Framework
             if ((bool)openFile.ShowDialog())
             {
                 string fileName = openFile.FileName;
+                WindowTitle = fileName;
 
                 switch(Path.GetExtension(fileName))
                 {

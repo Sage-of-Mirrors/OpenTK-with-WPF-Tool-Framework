@@ -6,7 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace OpenGL_in_WPF_Framework
+namespace OpenTKFramework
 {
     /// <summary>
     /// Interaction logic for App.xaml

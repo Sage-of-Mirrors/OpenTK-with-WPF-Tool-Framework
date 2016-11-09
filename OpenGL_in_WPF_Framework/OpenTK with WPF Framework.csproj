@@ -7,7 +7,7 @@
     <ProjectGuid>{9841E0B1-0D43-4BB3-A759-7620765D5ECA}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>OpenGL_in_WPF_Framework</RootNamespace>
+    <RootNamespace>OpenTKFramework</RootNamespace>
     <AssemblyName>OpenTK with WPF Framework</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -73,12 +73,15 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="src\RelayCommand.cs" />
+    <Compile Include="src\Viewmodel\Command Callbacks.cs" />
+    <Compile Include="src\Viewmodel\INotifyPropertyChanged Implementation.cs" />
     <Compile Include="src\Viewport\Camera.cs" />
     <Compile Include="src\Viewport\Input.cs" />
     <Compile Include="src\Viewport\IRenderable.cs" />
     <Compile Include="src\MathE.cs" />
     <Compile Include="src\Viewport\Renderer.cs" />
-    <Compile Include="src\Viewmodel\ViewModel.cs" />
+    <Compile Include="src\Viewmodel\File Input.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

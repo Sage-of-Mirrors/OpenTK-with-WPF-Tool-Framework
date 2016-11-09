@@ -9,7 +9,7 @@ using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 
-namespace OpenGL_in_WPF_Framework
+namespace OpenTKFramework
 {
     public enum ShaderAttributeIds
     {

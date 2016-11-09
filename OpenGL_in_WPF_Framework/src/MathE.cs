@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using OpenTK;
 
-namespace OpenGL_in_WPF_Framework
+namespace OpenTKFramework
 {
     public static class MathE
     {
