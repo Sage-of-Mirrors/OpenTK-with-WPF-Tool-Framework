@@ -28,7 +28,6 @@ namespace OpenTKFramework
         private Timer m_intervalTimer;
 
         private GLControl m_control;
-        private bool isCreated;
 
         private int _programID;
         private int _uniformMVP;
@@ -46,6 +45,7 @@ namespace OpenTKFramework
             m_control = context;
             context.Width = (int)host.Width;
             context.Height = (int)host.Height;
+            RenderableObjs = new List<IRenderable>();
 
             Cam = new Camera();
 
@@ -65,7 +65,6 @@ namespace OpenTKFramework
 
                 if (host.IsFocused)
                 {
-                    Console.WriteLine(string.Format("Focused! {0}", mousePosGlobal.X));
                     Cam.Update();
                 }
 
@@ -80,7 +79,6 @@ namespace OpenTKFramework
 
             host.LayoutUpdated += host_LayoutUpdated;
             ProjectionMatrix = Matrix4.Identity;
-            isCreated = true;
         }
 
         private void SetUpViewport()
@@ -97,7 +95,6 @@ namespace OpenTKFramework
             GL.DeleteShader(fragShaderId);
 
             GL.BindAttribLocation(_programID, (int)ShaderAttributeIds.Position, "vertexPos");
-
             GL.LinkProgram(_programID);
 
             _uniformMVP = GL.GetUniformLocation(_programID, "modelview");
@@ -116,7 +113,6 @@ namespace OpenTKFramework
             }
 
             GL.CompileShader(address);
-
             GL.AttachShader(program, address);
 
             int compileSuccess;
@@ -129,45 +125,45 @@ namespace OpenTKFramework
         #endregion
 
         #region Rendering
-
+        /// <summary>
+        /// Renders every renderable object to the screen each frame.
+        /// </summary>
         private void Draw()
         {
-            if (!isCreated)
-                return;
-
             GL.ClearColor(new Color4(.36f, .25f, .94f, 1f));
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
             GL.UseProgram(_programID);
-
             GL.Enable(EnableCap.DepthTest);
-
             GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
 
             float width, height;
 
+            // Prevents width from being 0, thus causing a crash
             if (m_control.Width == 0)
                 width = 1f;
-
             else
                 width = m_control.Width;
-
+            // Prevents height from being 0, thus causing a crash
             if (m_control.Height == 0)
                 height = 1f;
-
             else
                 height = m_control.Height;
 
             ViewMatrix = Cam.ViewMatrix;
             ProjectionMatrix = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(65), width / height, 100, 500000);
 
-            //Render stuff goes here
+            foreach (IRenderable renderable in RenderableObjs)
+                renderable.Render();
 
             RenderDebugCube();
 
             m_control.SwapBuffers();
         }
 
+        /// <summary>
+        /// Renders a triangle at (0,0,0).
+        /// </summary>
         private void RenderDebugTri()
         {
             Matrix4 modelMatrix = Matrix4.CreateTranslation(new Vector3(0, 0, 0)) * Matrix4.CreateFromQuaternion(Quaternion.Identity) * Matrix4.CreateScale(1);
@@ -186,6 +182,9 @@ namespace OpenTKFramework
             GL.End();
         }
 
+        /// <summary>
+        /// Renders a cube at (0,0,0).
+        /// </summary>
         private void RenderDebugCube()
         {
             Matrix4 modelMatrix = Matrix4.CreateTranslation(new Vector3(0, 0, 0)) * Matrix4.CreateFromQuaternion(Quaternion.Identity) * Matrix4.CreateScale(1);
@@ -262,55 +261,68 @@ namespace OpenTKFramework
         #endregion
 
         #region Events
-
+        /// <summary>
+        /// Handles the event that occurs when a mouse button is released.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         void m_control_MouseUp(object sender, System.Windows.Forms.MouseEventArgs e)
         {
-            if (!isCreated)
-                return;
-
             Input.Internal_SetMouseBtnState(e.Button, false);
         }
 
+        /// <summary>
+        /// Handles the event that occurs when a mouse button is pressed.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         void m_control_MouseDown(object sender, System.Windows.Forms.MouseEventArgs e)
         {
-            if (!isCreated)
-                return;
-
             Input.Internal_SetMouseBtnState(e.Button, true);
+
+            if (Input.GetMouseButtonDown(0))
+                debugRayColor = Cam.CastRay(e.X, e.Y, m_control.Width, m_control.Height, ProjectionMatrix);
         }
 
+        /// <summary>
+        /// Handles the event that occurs when the mouse is moved.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         void m_control_MouseMove(object sender, System.Windows.Forms.MouseEventArgs e)
         {
-            if (!isCreated)
-                return;
 
-            debugRayColor = Cam.CastRay(e.X, e.Y, m_control.Width, m_control.Height, ProjectionMatrix);
         }
 
+        /// <summary>
+        /// Handles the event that occurs when a key on the keyboard is released.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         void host_KeyUp(object sender, System.Windows.Input.KeyEventArgs e)
         {
-            if (!isCreated)
-                return;
-
             Input.Internal_SetKeyState((Keys)KeyInterop.VirtualKeyFromKey(e.Key), false);
         }
 
+        /// <summary>
+        /// Handles the event that occurs when a key on the keyboard is pressed.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         void host_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {
-            if (!isCreated)
-                return;
-
             Input.Internal_SetKeyState((Keys)KeyInterop.VirtualKeyFromKey(e.Key), true);
         }
 
+        /// <summary>
+        /// Handles the event that occurs when the viewport's window is resized.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         void host_LayoutUpdated(object sender, EventArgs e)
         {
-            if (!isCreated)
-                return;
-
             GL.Viewport(m_control.Location.X, m_control.Location.Y, m_control.Width, m_control.Height);
         }
-
         #endregion
     }
 }
