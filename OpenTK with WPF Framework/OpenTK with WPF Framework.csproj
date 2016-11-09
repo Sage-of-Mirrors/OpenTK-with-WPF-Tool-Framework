@@ -19,7 +19,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>..\bin\Debug\x86\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -75,14 +75,12 @@
     </ApplicationDefinition>
     <Compile Include="src\Camera\Transform.cs" />
     <Compile Include="src\ViewModel\RelayCommand.cs" />
-    <Compile Include="src\ViewModel\Command Callbacks.cs" />
-    <Compile Include="src\ViewModel\INotifyPropertyChanged Implementation.cs" />
     <Compile Include="src\Camera\Camera.cs" />
     <Compile Include="src\Camera\Input.cs" />
     <Compile Include="src\Viewport\IRenderable.cs" />
     <Compile Include="src\Camera\MathE.cs" />
     <Compile Include="src\Viewport\Renderer.cs" />
-    <Compile Include="src\ViewModel\File Input.cs" />
+    <Compile Include="src\ViewModel\BaseMainWindowViewModel.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -134,6 +132,12 @@
     <Content Include="lib\OpenTK.dll" />
     <Content Include="lib\OpenTK.GLControl.dll" />
     <Content Include="lib\WArchiveTools.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\WCommon\WCommon.csproj">
+      <Project>{e8af46cc-76dc-4541-a578-5067ead07087}</Project>
+      <Name>WCommon</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -1,8 +1,8 @@
-﻿using System;
-using System.Windows;
-using OpenTK;
+﻿using OpenTK;
 using OpenTK.Graphics;
-using OpenTKFramework.src.Viewmodel;
+using OpenTKFramework.src.ViewModel;
+using System;
+using System.Windows;
 
 namespace OpenTKFramework
 {
@@ -11,11 +11,11 @@ namespace OpenTKFramework
     /// </summary>
     public partial class MainWindow : Window
     {
-        private ViewModel m_viewModel;
+        private BaseMainWindowViewModel m_viewModel;
 
         public MainWindow()
         {
-            m_viewModel = new ViewModel();
+            m_viewModel = new BaseMainWindowViewModel();
             DataContext = m_viewModel;
             InitializeComponent();
         }
@@ -33,11 +33,6 @@ namespace OpenTKFramework
 
             GLHost.Child = m_glControl;
             GLHost.AllowDrop = true;
-        }
-
-        private void MenuItem_Click(object sender, RoutedEventArgs e)
-        {
-            m_viewModel.Open();
         }
     }
 }

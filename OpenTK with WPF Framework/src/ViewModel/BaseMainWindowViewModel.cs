@@ -1,16 +1,65 @@
-﻿/* This file contains the callbacks that the menu bar at the top of 
- * the main window uses to do things when the options are clicked.
- * It also has the methods that the OnRequestApplication Exit,
- * OnRequestReportBug, and OnRequestOpenWiki callbacks use. */
-
+﻿using Microsoft.Win32;
+using OpenTK;
 using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using System.Windows;
+using System.Windows.Forms.Integration;
 using System.Windows.Input;
 
-namespace OpenTKFramework.src.Viewmodel
+namespace OpenTKFramework.src.ViewModel
 {
-    partial class ViewModel : INotifyPropertyChanged
+    public class BaseMainWindowViewModel : INotifyPropertyChanged
     {
+        #region File Input
+        #region string WindowTitle
+        private string m_windowTitle;
+
+        public string WindowTitle
+        {
+            get { return string.Format("{0} - OpenTK with WPF Framework", m_windowTitle); }
+            set
+            {
+                if (m_windowTitle != value)
+                {
+                    m_windowTitle = value;
+                    NotifyPropertyChanged();
+                }
+            }
+        }
+        #endregion
+        
+        public virtual void Open()
+        {
+            OpenFileDialog openFile = new OpenFileDialog();
+
+            if ((bool)openFile.ShowDialog())
+            {
+                string fileName = openFile.FileName;
+                WindowTitle = fileName;
+            }
+        }
+        #endregion
+
+        #region Rendering
+        private Renderer m_renderer;
+
+        internal void CreateGraphicsContext(GLControl ctrl, WindowsFormsHost host)
+        {
+            m_renderer = new Renderer(ctrl, host);
+        }
+        #endregion
+
+        #region INotifyPropertyChanged Implementation
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
+        {
+            if (PropertyChanged != null)
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+        }
+        #endregion
+
+        #region Command Callbacks
         /// <summary> The user has requested to open a file. </summary>
         public ICommand OnRequestOpenFile
         {
@@ -56,7 +105,7 @@ namespace OpenTKFramework.src.Viewmodel
         /// <summary>
         /// Exits the application.
         /// </summary>
-        private void ExitApplication()
+        public virtual void ExitApplication()
         {
             Application.Current.MainWindow.Close();
         }
@@ -64,7 +113,7 @@ namespace OpenTKFramework.src.Viewmodel
         /// <summary>
         /// Opens the user's default browser to OpenGL_in_WPF_Framework's Issues page.
         /// </summary>
-        private void ReportBug()
+        public virtual void ReportBug()
         {
             System.Diagnostics.Process.Start("https://github.com/Sage-of-Mirrors/OpenTK_with_WPF_Framework/issues");
         }
@@ -72,9 +121,10 @@ namespace OpenTKFramework.src.Viewmodel
         /// <summary>
         /// Opens the user's default browser to OpenGL_in_WPF_Framework's Wiki page.
         /// </summary>
-        private void OpenWiki()
+        public virtual void OpenWiki()
         {
             System.Diagnostics.Process.Start("https://github.com/Sage-of-Mirrors/OpenTK_with_WPF_Framework/wiki");
         }
+        #endregion
     }
 }

@@ -39,7 +39,6 @@ namespace OpenTKFramework
         private Color4 debugRayColor = Color4.Yellow;
 
         #region Construction
-
         public Renderer(GLControl context, WindowsFormsHost host)
         {
             m_control = context;
@@ -81,6 +80,9 @@ namespace OpenTKFramework
             ProjectionMatrix = Matrix4.Identity;
         }
 
+        /// <summary>
+        /// Creates a camera and sets up shaders for use in the viewport.
+        /// </summary>
         private void SetUpViewport()
         {
             _programID = GL.CreateProgram();
@@ -121,7 +123,6 @@ namespace OpenTKFramework
             if (compileSuccess == 0)
                 Console.WriteLine(GL.GetShaderInfoLog(address));
         }
-
         #endregion
 
         #region Rendering
@@ -257,7 +258,6 @@ namespace OpenTKFramework
 
             GL.End();
         }
-
         #endregion
 
         #region Events
