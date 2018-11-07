@@ -1,0 +1,3 @@
+[submodule "WCommon"]
+	path = WCommon
+	url = https://github.com/LordNed/WCommon.git
