@@ -1,11 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.28010.2036
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenTK with WPF Framework", "OpenTK with WPF Framework\OpenTK with WPF Framework.csproj", "{9841E0B1-0D43-4BB3-A759-7620765D5ECA}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WCommon", "WCommon\WCommon.csproj", "{E8AF46CC-76DC-4541-A578-5067EAD07087}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,16 +21,11 @@ Global
 		{9841E0B1-0D43-4BB3-A759-7620765D5ECA}.Release|Any CPU.Build.0 = Release|Any CPU
 		{9841E0B1-0D43-4BB3-A759-7620765D5ECA}.Release|x64.ActiveCfg = Release|Any CPU
 		{9841E0B1-0D43-4BB3-A759-7620765D5ECA}.Release|x64.Build.0 = Release|Any CPU
-		{E8AF46CC-76DC-4541-A578-5067EAD07087}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E8AF46CC-76DC-4541-A578-5067EAD07087}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E8AF46CC-76DC-4541-A578-5067EAD07087}.Debug|x64.ActiveCfg = Debug|x64
-		{E8AF46CC-76DC-4541-A578-5067EAD07087}.Debug|x64.Build.0 = Debug|x64
-		{E8AF46CC-76DC-4541-A578-5067EAD07087}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E8AF46CC-76DC-4541-A578-5067EAD07087}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E8AF46CC-76DC-4541-A578-5067EAD07087}.Release|x64.ActiveCfg = Release|x64
-		{E8AF46CC-76DC-4541-A578-5067EAD07087}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {EB28161E-AD21-44D5-AC56-B218C6A4E53E}
 	EndGlobalSection
 EndGlobal

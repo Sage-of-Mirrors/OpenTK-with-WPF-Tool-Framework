@@ -133,12 +133,6 @@
     <Content Include="lib\OpenTK.GLControl.dll" />
     <Content Include="lib\WArchiveTools.dll" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\WCommon\WCommon.csproj">
-      <Project>{e8af46cc-76dc-4541-a578-5067ead07087}</Project>
-      <Name>WCommon</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
